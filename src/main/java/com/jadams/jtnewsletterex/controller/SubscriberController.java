@@ -57,31 +57,31 @@ public class SubscriberController {
     }
 
 
-    @PostMapping("/sendEmailList")
-    public String sendEmailList(@RequestParam("Subject") String subject,
-                                @RequestParam("message") String body){
-
-        List<Subscriber> subscriberList = subscriberDao.findAll();
-        subscriberList.forEach(subscriber -> {
-            String tstEmail = subscriber.getEmailId();
-            sendSimpleEmail(tstEmail, body, subject);
-        });
-        return "example ---->";
-    }
-
-
-    @PostMapping("/sendEmail")
-    public String sendEmail(@RequestParam("id") Long userId,
-                            @RequestParam("Subject") String subject,
-                            @RequestParam("message") String body){
-
-        Optional<Subscriber> subscriberEmail = subscriberDao.findById(userId);
-        subscriberEmail.ifPresent( subscriber -> {
-           String tstEmail = subscriber.getEmailId();
-           sendSimpleEmail(tstEmail, body, subject);
-        });
-        return "Example ---->";
-    }
+//    @PostMapping("/sendEmailList")
+//    public String sendEmailList(@RequestParam("Subject") String subject,
+//                                @RequestParam("message") String body){
+//
+//        List<Subscriber> subscriberList = subscriberDao.findAll();
+//        subscriberList.forEach(subscriber -> {
+//            String tstEmail = subscriber.getEmailId();
+//            sendSimpleEmail(tstEmail, body, subject);
+//        });
+//        return "example ---->";
+//    }
+//
+//
+//    @PostMapping("/sendEmail")
+//    public String sendEmail(@RequestParam("id") Long userId,
+//                            @RequestParam("Subject") String subject,
+//                            @RequestParam("message") String body){
+//
+//        Optional<Subscriber> subscriberEmail = subscriberDao.findById(userId);
+//        subscriberEmail.ifPresent( subscriber -> {
+//           String tstEmail = subscriber.getEmailId();
+//           sendSimpleEmail(tstEmail, body, subject);
+//        });
+//        return "Example ---->";
+//    }
 
 
     @GetMapping("/subscribers")
@@ -90,16 +90,15 @@ public class SubscriberController {
         return new ResponseEntity<>(subscriberList, HttpStatus.OK);
     }
 
-    public String sendSimpleEmail (String emlMsg, String bdyMsg, String sbjct){
-        SimpleMailMessage message = new SimpleMailMessage();
-        // set From Address for Email
-        message.setFrom("");
-        message.setTo(emlMsg);
-        message.setText(bdyMsg);
-        message.setSubject(sbjct);
-        mailSender.send(message);
-        return "Mail sent";
-    }
+//    public String sendSimpleEmail (String emlMsg, String bdyMsg, String sbjct){
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setFrom("adamsjt95@gmail.com");
+//        message.setTo(emlMsg);
+//        message.setText(bdyMsg);
+//        message.setSubject(sbjct);
+//        mailSender.send(message);
+//        return "Mail sent";
+//    }
 
 
 
