@@ -4,9 +4,14 @@ import com.jadams.jtnewsletterex.dao.SubscriberDao;
 import com.jadams.jtnewsletterex.domain.Email;
 import com.jadams.jtnewsletterex.domain.Subscriber;
 import freemarker.template.Configuration;
+import freemarker.template.TemplateExceptionHandler;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,35 +45,45 @@ public class EmailController {
             String tstEmail = subscriber.getEmailId();
             model.addAttribute("firstName", subscriber.getFirstName());
             model.addAttribute("lastName", subscriber.getLastName());
-            sendSimpleEmail(tstEmail, subject, model);
+            try {
+                sendSimpleEmail(tstEmail, subject, model);
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
         });
         return "sent-email-template.html";
     }
 
-    @PostMapping("/sendEmailList")
+    @PostMapping(value = "/sendEmailList")
     public String sendEmailList(@RequestParam("Subject") String subject, Model model){
         List<Subscriber> subscriberList = subscriberDao.findAll();
         subscriberList.forEach(subscriber -> {
             String tstEmail = subscriber.getEmailId();
-            model.addAttribute("firstName", subscriber.getFirstName());
+            model.addAttribute("firstName", subscriber.getFirstName() + "\t");
             model.addAttribute("lastName", subscriber.getLastName());
-            sendSimpleEmail(tstEmail, subject, model);
+            try {
+                sendSimpleEmail(tstEmail, subject, model);
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
         });
         return "sent-email-template.html";
     }
 
-    public void sendSimpleEmail (String emlMsg, String sbjct, Model model){
-        SimpleMailMessage message = new SimpleMailMessage();
-        Email tstEmail = new Email();
-        tstEmail.setFrom("adamsjt95@gmail.com");
-        tstEmail.setTo(emlMsg);
-        tstEmail.setSubject(sbjct);
-        tstEmail.setContent(geContentFromTemplate(model));
-        message.setFrom(tstEmail.getFrom());
-        message.setTo(tstEmail.getTo());
-        message.setText(tstEmail.getContent());
-        message.setSubject(tstEmail.getSubject());
-        mailSender.send(message);
+    public void sendSimpleEmail (String emlMsg, String sbjct, Model model) throws MessagingException {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+//        SimpleMailMessage message = new SimpleMailMessage();
+            Email tstEmail = new Email();
+            tstEmail.setFrom("adamsjt95@gmail.com");
+            tstEmail.setTo(emlMsg);
+            tstEmail.setSubject(sbjct);
+            tstEmail.setContent(geContentFromTemplate(model));
+            helper.setFrom(tstEmail.getFrom());
+            helper.setTo(tstEmail.getTo());
+            helper.setSubject(tstEmail.getSubject());
+            helper.setText(tstEmail.getContent(), true);
+            mailSender.send(message);
     }
 
 
@@ -76,7 +92,10 @@ public class EmailController {
         StringBuffer content = new StringBuffer();
 
         try {
-            content.append(FreeMarkerTemplateUtils.processTemplateIntoString(fmConfiguration.getTemplate("email-template.html"), model));
+            fmConfiguration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            fmConfiguration.setDefaultEncoding("UTF-8");
+//            fmConfiguration.set
+            content.append(FreeMarkerTemplateUtils.processTemplateIntoString(fmConfiguration.getTemplate("email-template.ftl"), model.asMap()));
         } catch (Exception e) {
             e.printStackTrace();
         }
