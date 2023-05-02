@@ -1,13 +1,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
     <main>
         <div>
     <h3><span>Dear ${firstName} ${lastName},</span></h3>
-    <p>Sending Email using Spring 4 with <b>FreeMarker template !!!</b></p>
-    <p>Thanks Sincerely</p>
+    <p>${text}</p>
+    <p>Thanks Sincerely Test Company</p>
         </div>
     </main>
 

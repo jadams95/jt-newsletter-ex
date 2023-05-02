@@ -1,8 +1,10 @@
 package com.jadams.jtnewsletterex.controller;
 
 import com.jadams.jtnewsletterex.dao.SubscriberDao;
+import com.jadams.jtnewsletterex.dao.TemplateDao;
 import com.jadams.jtnewsletterex.domain.Email;
 import com.jadams.jtnewsletterex.domain.Subscriber;
+import com.jadams.jtnewsletterex.domain.Template;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 import jakarta.mail.MessagingException;
@@ -36,6 +38,9 @@ public class EmailController {
     @Autowired
     private SubscriberDao subscriberDao;
 
+    @Autowired
+    private TemplateDao templateDao;
+
     @PostMapping("/sendEmail")
     public String sendEmail(@RequestParam("id") Long userId,
                             @RequestParam("Subject") String subject, Model model){
@@ -55,12 +60,17 @@ public class EmailController {
     }
 
     @PostMapping(value = "/sendEmailList")
-    public String sendEmailList(@RequestParam("Subject") String subject, Model model){
+    public String sendEmailList(@RequestParam("Subject") String subject, @RequestParam("Templateid") Integer templateId, Model model){
         List<Subscriber> subscriberList = subscriberDao.findAll();
+        Template template = new Template();
+
+       templateDao.findById(templateId.longValue()).ifPresent(x -> template.setText(x.getText()));
+
         subscriberList.forEach(subscriber -> {
             String tstEmail = subscriber.getEmailId();
             model.addAttribute("firstName", subscriber.getFirstName() + "\t");
             model.addAttribute("lastName", subscriber.getLastName());
+            model.addAttribute("text", template.getText());
             try {
                 sendSimpleEmail(tstEmail, subject, model);
             } catch (MessagingException e) {
@@ -73,7 +83,6 @@ public class EmailController {
     public void sendSimpleEmail (String emlMsg, String sbjct, Model model) throws MessagingException {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
-//        SimpleMailMessage message = new SimpleMailMessage();
             Email tstEmail = new Email();
             tstEmail.setFrom("adamsjt95@gmail.com");
             tstEmail.setTo(emlMsg);

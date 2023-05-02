@@ -30,14 +30,12 @@ import java.util.stream.Collectors;
 public class SubscriberController {
 
 
-    @Autowired
-    private JavaMailSender mailSender;
 
     @Autowired
     private SubscriberDao subscriberDao;
 
-    @PostMapping("/uploadFile")
-    public String uploadExcelData(@RequestParam("file")MultipartFile file) throws Exception{
+    @PostMapping("/uploadSubscriberFileList")
+    public String uploadSubscriberExcelData(@RequestParam("file")MultipartFile file) throws Exception{
         List<Subscriber> subscriberList = new ArrayList<>();
         InputStream inputStream = file.getInputStream();
         CsvParserSettings settings = new CsvParserSettings();
@@ -57,48 +55,12 @@ public class SubscriberController {
     }
 
 
-//    @PostMapping("/sendEmailList")
-//    public String sendEmailList(@RequestParam("Subject") String subject,
-//                                @RequestParam("message") String body){
-//
-//        List<Subscriber> subscriberList = subscriberDao.findAll();
-//        subscriberList.forEach(subscriber -> {
-//            String tstEmail = subscriber.getEmailId();
-//            sendSimpleEmail(tstEmail, body, subject);
-//        });
-//        return "example ---->";
-//    }
-//
-//
-//    @PostMapping("/sendEmail")
-//    public String sendEmail(@RequestParam("id") Long userId,
-//                            @RequestParam("Subject") String subject,
-//                            @RequestParam("message") String body){
-//
-//        Optional<Subscriber> subscriberEmail = subscriberDao.findById(userId);
-//        subscriberEmail.ifPresent( subscriber -> {
-//           String tstEmail = subscriber.getEmailId();
-//           sendSimpleEmail(tstEmail, body, subject);
-//        });
-//        return "Example ---->";
-//    }
-
 
     @GetMapping("/subscribers")
     public ResponseEntity<List<Subscriber>> getSubscriberLists(){
         List<Subscriber> subscriberList = subscriberDao.findAll();
         return new ResponseEntity<>(subscriberList, HttpStatus.OK);
     }
-
-//    public String sendSimpleEmail (String emlMsg, String bdyMsg, String sbjct){
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setFrom("adamsjt95@gmail.com");
-//        message.setTo(emlMsg);
-//        message.setText(bdyMsg);
-//        message.setSubject(sbjct);
-//        mailSender.send(message);
-//        return "Mail sent";
-//    }
 
 
 
