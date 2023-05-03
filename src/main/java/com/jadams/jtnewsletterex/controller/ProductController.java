@@ -63,6 +63,12 @@ public class ProductController {
     public ChatResponse getTemplateResponse(@RequestBody Message messageText) {
         return templateService.createAnContentPrompt(messageText);
     }
+    @PostMapping(value = "/createRefinedTemplate")
+    public ChatResponse getRefinedResponse(@RequestBody RefinedMessage messageBody) {
+        return templateService.createMoreSpecificPrompt(messageBody);
+    }
+
+
     @GetMapping(value = "/templates")
     public ResponseEntity<List<Template>> getTemplates(){
         return new ResponseEntity<>(templateService.getTemplates().stream().collect(Collectors.toList()), HttpStatus.OK);

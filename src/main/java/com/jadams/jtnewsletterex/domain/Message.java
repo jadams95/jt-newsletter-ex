@@ -1,7 +1,11 @@
 package com.jadams.jtnewsletterex.domain;
 
+import java.util.List;
+
 public class Message {
     private String message;
+
+
 
     public Message() {
     }
@@ -9,6 +13,8 @@ public class Message {
     public Message(String message) {
         this.message = message;
     }
+
+
 
     public String getMessage() {
         return message;

@@ -43,13 +43,15 @@ public class EmailController {
 
     @PostMapping("/sendEmail")
     public String sendEmail(@RequestParam("id") Long userId,
-                            @RequestParam("Subject") String subject, Model model){
-
+                            @RequestParam("Subject") String subject, @RequestParam("Templateid") Integer templateId, Model model){
+        Template template = new Template();
+        templateDao.findById(templateId.longValue()).ifPresent(x -> template.setText(x.getText()));
         Optional<Subscriber> subscriberEmail = subscriberDao.findById(userId);
         subscriberEmail.ifPresent( subscriber -> {
             String tstEmail = subscriber.getEmailId();
             model.addAttribute("firstName", subscriber.getFirstName());
             model.addAttribute("lastName", subscriber.getLastName());
+            model.addAttribute("text", template.getText());
             try {
                 sendSimpleEmail(tstEmail, subject, model);
             } catch (MessagingException e) {
@@ -61,12 +63,10 @@ public class EmailController {
 
     @PostMapping(value = "/sendEmailList")
     public String sendEmailList(@RequestParam("Subject") String subject, @RequestParam("Templateid") Integer templateId, Model model){
-        List<Subscriber> subscriberList = subscriberDao.findAll();
-        Template template = new Template();
-
+       List<Subscriber> subscriberList = subscriberDao.findAll();
+       Template template = new Template();
        templateDao.findById(templateId.longValue()).ifPresent(x -> template.setText(x.getText()));
-
-        subscriberList.forEach(subscriber -> {
+       subscriberList.forEach(subscriber -> {
             String tstEmail = subscriber.getEmailId();
             model.addAttribute("firstName", subscriber.getFirstName() + "\t");
             model.addAttribute("lastName", subscriber.getLastName());
@@ -103,7 +103,6 @@ public class EmailController {
         try {
             fmConfiguration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             fmConfiguration.setDefaultEncoding("UTF-8");
-//            fmConfiguration.set
             content.append(FreeMarkerTemplateUtils.processTemplateIntoString(fmConfiguration.getTemplate("email-template.ftl"), model.asMap()));
         } catch (Exception e) {
             e.printStackTrace();

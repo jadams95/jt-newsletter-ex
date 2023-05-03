@@ -1,6 +1,7 @@
 package com.jadams.jtnewsletterex.service;
 
 import com.jadams.jtnewsletterex.dao.TemplateDao;
+import com.jadams.jtnewsletterex.domain.RefinedMessage;
 import com.jadams.jtnewsletterex.domain.Template;
 import com.jadams.jtnewsletterex.domain.model.ChatRequest;
 import com.jadams.jtnewsletterex.domain.model.ChatResponse;
@@ -67,6 +68,27 @@ public class TemplateService {
             templateDao.save(template);
         return chatResponse;
     }
+
+    @Transactional
+    public ChatResponse createMoreSpecificPrompt(RefinedMessage refinedMessage)  {
+        Message message = new Message(refinedMessage.getMarketingIntro() + refinedMessage.getTargetSubscriber() + refinedMessage.getTargetSubscriber());
+        ChatResponse chatResponse = this.getResponse(this.buildHttpEntity(new ChatRequest("text-davinci-003",
+                message.getMessage(),
+                0.5f,
+                250,
+                1.0f,
+                0.0f,
+                0.0f,
+                5)));
+
+        Template template = new Template();
+        template.setPrompt(message.getMessage());
+        template.setText(chatResponse.getChoices().get(0).getText());
+        templateDao.save(template);
+        return chatResponse;
+    }
+
+
     public List<Template> getTemplates(){
         return templateDao.findAll();
     }
